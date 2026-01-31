@@ -1,0 +1,23 @@
+{
+  "name": "wcag-text-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for comprehensive WCAG text validation",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "wcag-text-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "culori": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
