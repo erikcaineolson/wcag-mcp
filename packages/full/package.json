@@ -1,0 +1,26 @@
+{
+  "name": "@wcag-mcp/full",
+  "version": "1.0.0",
+  "description": "Complete WCAG 2.1 MCP server with all accessibility validation tools",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "wcag-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@wcag-mcp/core": "^1.0.0",
+    "@wcag-mcp/text": "^1.0.0",
+    "@wcag-mcp/keyboard": "^1.0.0",
+    "@wcag-mcp/aria": "^1.0.0",
+    "@wcag-mcp/media": "^1.0.0",
+    "@wcag-mcp/forms": "^1.0.0",
+    "@wcag-mcp/structure": "^1.0.0"
+  }
+}

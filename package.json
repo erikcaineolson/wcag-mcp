@@ -1,20 +1,25 @@
 {
-  "name": "wcag-text-mcp",
+  "name": "wcag-mcp",
   "version": "1.0.0",
-  "description": "MCP server for comprehensive WCAG text validation",
+  "private": true,
+  "description": "WCAG 2.1 accessibility validation MCP server suite",
   "type": "module",
-  "main": "dist/index.js",
-  "bin": {
-    "wcag-text-mcp": "dist/index.js"
-  },
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "tsc --watch"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
-    "culori": "^4.0.0"
+    "build": "npm run build:core && npm run build:packages",
+    "build:core": "npm run build --workspace=@wcag-mcp/core",
+    "build:packages": "npm run build --workspace=@wcag-mcp/text --workspace=@wcag-mcp/keyboard --workspace=@wcag-mcp/aria --workspace=@wcag-mcp/media --workspace=@wcag-mcp/forms --workspace=@wcag-mcp/structure --workspace=@wcag-mcp/full",
+    "build:text": "npm run build --workspace=@wcag-mcp/text",
+    "build:keyboard": "npm run build --workspace=@wcag-mcp/keyboard",
+    "build:aria": "npm run build --workspace=@wcag-mcp/aria",
+    "build:media": "npm run build --workspace=@wcag-mcp/media",
+    "build:forms": "npm run build --workspace=@wcag-mcp/forms",
+    "build:structure": "npm run build --workspace=@wcag-mcp/structure",
+    "build:full": "npm run build --workspace=@wcag-mcp/full",
+    "clean": "rm -rf packages/*/dist",
+    "typecheck": "tsc --build packages/*/tsconfig.json"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

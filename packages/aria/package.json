@@ -1,0 +1,20 @@
+{
+  "name": "@wcag-mcp/aria",
+  "version": "1.0.0",
+  "description": "MCP server for WCAG ARIA accessibility validation",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "wcag-aria-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@wcag-mcp/core": "^1.0.0"
+  }
+}

@@ -1,132 +1,242 @@
-# WCAG Text MCP Server
+# WCAG MCP Server Suite
 
-MCP server for comprehensive WCAG 2.1 text accessibility validation. Returns both human-readable reports and machine-readable JSON.
+A modular suite of MCP (Model Context Protocol) servers for WCAG 2.1 accessibility validation.
 
-## Authors
+## Architecture
 
-- Erik Olson ([@erikcaineolson](https://github.com/erikcaineolson))
-- Claude Opus 4.5 (AI pair programmer)
+This monorepo contains individual focused servers plus an umbrella server for full WCAG coverage:
 
-## WCAG Criteria Covered
-
-| Criterion | Level | What it checks |
-|-----------|-------|----------------|
-| 1.4.3 | AA | Contrast ratio ≥4.5:1 (3:1 for large text) |
-| 1.4.4 | AA | Text can resize to 200% |
-| 1.4.5 | AA | Use real text, not images of text |
-| 1.4.6 | AAA | Contrast ratio ≥7:1 (4.5:1 for large text) |
-| 1.4.8 | AAA | Line length ≤80 chars, no justify |
-| 1.4.10 | AA | Content reflows at 400% zoom |
-| 1.4.12 | AA | Supports custom spacing (line-height ≥1.5×, etc.) |
-| 3.1.1 | A | Page has lang attribute |
-| 3.1.2 | AA | Language changes are marked |
-
-## Tools
-
-| Tool | Description |
-|------|-------------|
-| `check_contrast` | Color contrast ratio validation |
-| `check_text_spacing` | Line-height, letter/word/paragraph spacing |
-| `check_line_length` | Max 80 characters per line |
-| `check_language` | Page language attribute |
-| `validate_text` | Comprehensive validation of all criteria |
-| `get_wcag_text_criteria` | Reference information for all criteria |
-
-## Output Format
-
-All tools return dual-format output:
-
-1. **Human-readable report** with pass/fail/warning symbols
-2. **Machine-readable JSON** with structured results
-
-Example output:
 ```
-═══════════════════════════════════════════════════════════════
-                    WCAG TEXT ACCESSIBILITY REPORT
-═══════════════════════════════════════════════════════════════
-
-SUMMARY: 3 passed, 1 failed, 1 warnings
-
-❌ FAILURES
-───────────────────────────────────────────────────────────────
-[1.4.12] Text Spacing (Level AA)
-   Line height: 18px < 21.0px (1.5× font size) ✗
-   → Ensure text remains readable when users apply custom spacing
-
-✅ PASSED
-───────────────────────────────────────────────────────────────
-[1.4.3] Contrast (Minimum) (Level AA): Contrast ratio 7.46:1 meets AA
+packages/
+├── core/       # Shared types, criteria definitions, report formatting
+├── text/       # Text accessibility (contrast, spacing, language) ✅
+├── keyboard/   # Keyboard navigation and focus (2.1.x, 2.4.x) ✅
+├── aria/       # ARIA roles, states, properties (4.1.x) ✅
+├── media/      # Captions, audio descriptions (1.2.x) ✅
+├── forms/      # Labels, error handling (1.3.x, 3.3.x) ✅
+├── structure/  # Headings, landmarks, reading order (1.3.x, 2.4.x) ✅
+└── full/       # Umbrella combining all servers ✅
 ```
 
-## Installation
-
-### Build from Source
+## Quick Start
 
 ```bash
-git clone https://github.com/erikcaineolson/wcag-text-mcp.git
-cd wcag-text-mcp
+# Install dependencies
 npm install
+
+# Build all packages
 npm run build
+
+# Or build individually
+npm run build:core
+npm run build:text
+npm run build:keyboard
+# etc.
 ```
 
-### As MCP Server
+## Packages
 
-Add to your project's `.mcp.json`:
+### @wcag-mcp/core
+
+Shared library with:
+- TypeScript types for check results, reports, criteria
+- Complete WCAG 2.1 criteria definitions (78 criteria) with categories
+- Report formatting utilities (human-readable and machine-readable)
+
+### @wcag-mcp/text
+
+Text accessibility validation.
+
+**WCAG Criteria:** 1.4.3, 1.4.4, 1.4.5, 1.4.6, 1.4.8, 1.4.10, 1.4.12, 3.1.1, 3.1.2
+
+**Tools:**
+- `check_contrast` - Color contrast ratio (AA/AAA)
+- `check_text_spacing` - Line-height, letter/word spacing
+- `check_line_length` - Max 80 characters (AAA)
+- `check_language` - Page lang attribute
+- `validate_text` - Comprehensive text validation
+- `get_wcag_text_criteria` - Reference data
+
+### @wcag-mcp/keyboard
+
+Keyboard and pointer accessibility validation.
+
+**WCAG Criteria:** 2.1.1, 2.1.2, 2.1.4, 2.2.1, 2.2.3, 2.4.3, 2.4.7, 2.5.1, 2.5.2, 2.5.4, 2.5.5, 3.2.1
+
+**Tools:**
+- `check_keyboard_access` - Keyboard operability, focus trapping
+- `check_focus_indicator` - Focus visibility and contrast
+- `check_timing` - Time limit adjustability
+- `check_motion` - Motion actuation controls
+- `check_pointer_gestures` - Complex gesture alternatives
+- `check_pointer_cancellation` - Down-event cancellation
+- `check_target_size` - Touch target dimensions
+- `get_wcag_keyboard_criteria` - Reference data
+
+### @wcag-mcp/aria
+
+ARIA and semantic accessibility validation.
+
+**WCAG Criteria:** 2.5.3, 4.1.1, 4.1.2, 4.1.3
+
+**Tools:**
+- `check_name_role_value` - Accessible names, roles, states
+- `check_status_message` - Live region announcements
+- `check_aria_attributes` - ARIA attribute validity
+- `check_landmarks` - Landmark region labeling
+- `check_label_in_name` - Visible label in accessible name
+- `get_wcag_aria_criteria` - Reference data
+
+### @wcag-mcp/media
+
+Media accessibility validation.
+
+**WCAG Criteria:** 1.2.1-1.2.9, 1.4.2, 2.2.2, 2.3.1, 2.3.2, 2.3.3
+
+**Tools:**
+- `check_captions` - Caption availability (prerecorded/live)
+- `check_audio_description` - Audio description for video
+- `check_transcript` - Text alternatives for media
+- `check_media_controls` - Autoplay control mechanisms
+- `check_animation` - Animation pause/stop controls
+- `check_flashing` - Flash frequency thresholds
+- `check_sign_language` - Sign language interpretation
+- `get_wcag_media_criteria` - Reference data
+
+### @wcag-mcp/forms
+
+Form accessibility validation.
+
+**WCAG Criteria:** 1.3.5, 3.2.2, 3.3.1-3.3.6
+
+**Tools:**
+- `check_form_labels` - Label associations
+- `check_input_purpose` - Autocomplete attributes
+- `check_error_identification` - Error messaging
+- `check_error_prevention` - Submission safeguards
+- `check_input_constraints` - Format instructions
+- `check_on_input` - Context change on input
+- `validate_form` - Comprehensive form validation
+- `get_wcag_forms_criteria` - Reference data
+
+### @wcag-mcp/structure
+
+Page structure and navigation validation.
+
+**WCAG Criteria:** 1.3.1, 1.3.2, 2.4.1, 2.4.2, 2.4.4, 2.4.5, 2.4.6, 2.4.9, 2.4.10, 3.2.3, 3.2.4
+
+**Tools:**
+- `check_heading_structure` - Heading hierarchy
+- `check_page_title` - Title descriptiveness
+- `check_link_purpose` - Link text clarity
+- `check_bypass_blocks` - Skip links, landmarks
+- `check_reading_order` - DOM/visual order match
+- `check_info_relationships` - Semantic structure
+- `check_multiple_ways` - Navigation methods
+- `check_consistent_navigation` - Navigation consistency
+- `check_consistent_identification` - Component labeling
+- `get_wcag_structure_criteria` - Reference data
+
+### @wcag-mcp/full
+
+Umbrella server with overview tools.
+
+**Tools:**
+- `get_all_wcag_criteria` - All criteria filtered by level/category
+- `get_wcag_checklist` - Conformance level checklist
+- `wcag_help` - Usage help
+
+## Usage with Claude Code
+
+Add to your `.mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "wcag-text": {
       "command": "node",
-      "args": ["/path/to/wcag-text-mcp/dist/index.js"]
+      "args": ["/path/to/wcag-mcp/packages/text/dist/index.js"]
+    },
+    "wcag-keyboard": {
+      "command": "node",
+      "args": ["/path/to/wcag-mcp/packages/keyboard/dist/index.js"]
+    },
+    "wcag-aria": {
+      "command": "node",
+      "args": ["/path/to/wcag-mcp/packages/aria/dist/index.js"]
+    },
+    "wcag-media": {
+      "command": "node",
+      "args": ["/path/to/wcag-mcp/packages/media/dist/index.js"]
+    },
+    "wcag-forms": {
+      "command": "node",
+      "args": ["/path/to/wcag-mcp/packages/forms/dist/index.js"]
+    },
+    "wcag-structure": {
+      "command": "node",
+      "args": ["/path/to/wcag-mcp/packages/structure/dist/index.js"]
     }
   }
 }
 ```
 
-### Claude Code Skill
+Or use the umbrella server:
 
-Copy `skill/SKILL.md` to `~/.claude/skills/wcag/SKILL.md` to enable the `/wcag` command:
+```json
+{
+  "mcpServers": {
+    "wcag": {
+      "command": "node",
+      "args": ["/path/to/wcag-mcp/packages/full/dist/index.js"]
+    }
+  }
+}
+```
+
+## Development
 
 ```bash
-mkdir -p ~/.claude/skills/wcag
-cp skill/SKILL.md ~/.claude/skills/wcag/
+# Watch mode for development
+cd packages/text && npm run dev
+
+# Build all
+npm run build
+
+# Clean all dist folders
+npm run clean
 ```
 
-Then use:
+## Adding New Checks
+
+Import shared utilities from `@wcag-mcp/core`:
+
+```typescript
+import {
+  createReport,
+  formatToolResponse,
+  getCriteriaByCategory,
+  type CheckResult
+} from "@wcag-mcp/core";
+
+// Get criteria for a category
+const criteria = getCriteriaByCategory("keyboard");
+
+// Create a check result
+const result: CheckResult = {
+  criterion: "2.1.1",
+  name: "Keyboard",
+  level: "A",
+  status: "pass",
+  message: "All functionality is keyboard accessible"
+};
+
+// Create formatted report
+const report = createReport([result], {
+  title: "My Check",
+  category: "keyboard"
+});
 ```
-/wcag check #333 on white at 16px
-/wcag validate 14px #666 on #fff with 24px line-height
-/wcag https://example.com
-```
-
-## URL Analysis Mode
-
-When given a URL, the skill will:
-1. Navigate to the page using Playwright
-2. Extract all text styles (colors, fonts, spacing)
-3. Check contrast ratios for each unique style combination
-4. Test text spacing resilience by injecting WCAG-compliant spacing
-5. Detect layout issues (clipping, overlaps, ellipsis triggers)
-6. Generate a comprehensive accessibility report
-
-## Requirements Reference
-
-### Contrast (1.4.3, 1.4.6)
-- Normal text: 4.5:1 (AA), 7:1 (AAA)
-- Large text (≥18pt or ≥14pt bold): 3:1 (AA), 4.5:1 (AAA)
-
-### Text Spacing (1.4.12)
-Content must remain functional when users apply:
-- Line height ≥ 1.5× font size
-- Paragraph spacing ≥ 2× font size
-- Letter spacing ≥ 0.12× font size
-- Word spacing ≥ 0.16× font size
-
-### Visual Presentation (1.4.8)
-- Maximum 80 characters per line
-- Text not fully justified
-- Foreground/background colors can be selected by user
 
 ## License
 
