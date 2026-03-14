@@ -6,11 +6,15 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import { writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import {
   WCAG_CRITERIA,
   getCriteriaByLevel,
   formatErrorResponse,
+  formatMarkdownReport,
 } from "@wcag-mcp/core";
+import type { ValidationReport, CheckResult, WcagLevel, CheckStatus, ReportSummary, MachineReport } from "@wcag-mcp/core";
 
 // Import all tool handlers - we'll re-export their tools
 // Note: In a real implementation, you'd import the actual check functions
@@ -64,6 +68,67 @@ const META_TOOLS = [
     inputSchema: {
       type: "object" as const,
       properties: {},
+    },
+  },
+  {
+    name: "export_report",
+    description: "Export WCAG validation results to a Markdown file. Pass the machine-readable JSON from any WCAG check tool's output. The file is saved as WCAG_Results_YYYY-MM-DD.md in the specified directory (defaults to current directory).",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        results: {
+          type: "object",
+          description: "The machine-readable JSON object from any WCAG check tool response (the MACHINE-READABLE block).",
+          properties: {
+            wcagVersion: { type: "string" },
+            timestamp: { type: "string" },
+            category: { type: "string" },
+            summary: {
+              type: "object",
+              properties: {
+                total: { type: "number" },
+                passed: { type: "number" },
+                failed: { type: "number" },
+                warnings: { type: "number" },
+              },
+            },
+            results: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  criterion: { type: "string" },
+                  name: { type: "string" },
+                  level: { type: "string" },
+                  status: { type: "string" },
+                  message: { type: "string" },
+                  value: {},
+                  required: {},
+                  recommendation: { type: "string" },
+                  url: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        outputDir: {
+          type: "string",
+          description: "Directory to save the report file. Defaults to current working directory.",
+        },
+        title: {
+          type: "string",
+          description: "Custom report title. Defaults to 'WCAG Accessibility Report'.",
+        },
+        url: {
+          type: "string",
+          description: "URL of the page that was audited (optional, included in report metadata).",
+        },
+        notes: {
+          type: "string",
+          description: "Additional notes to include in the report.",
+        },
+      },
+      required: ["results"],
     },
   },
 ];
@@ -213,6 +278,10 @@ COMMON WORKFLOWS
 5. Get full checklist:
    Use get_wcag_checklist with target level (A, AA, or AAA)
 
+6. Export results to file:
+   Run any check, then pass its MACHINE-READABLE JSON to export_report
+   Saves as WCAG_Results_YYYY-MM-DD.md
+
 CONFORMANCE LEVELS
 ──────────────────
 Level A   - Minimum accessibility (30 criteria)
@@ -225,6 +294,70 @@ For checklist by level: get_wcag_checklist
 
         return {
           content: [{ type: "text", text: help }],
+        };
+      }
+
+      case "export_report": {
+        const { results: machineData, outputDir, title, url, notes } = (args || {}) as {
+          results: MachineReport;
+          outputDir?: string;
+          title?: string;
+          url?: string;
+          notes?: string;
+        };
+
+        // Reconstruct a ValidationReport from the machine data
+        const checkResults: CheckResult[] = machineData.results.map(r => ({
+          criterion: r.criterion,
+          name: r.name,
+          level: r.level as WcagLevel,
+          status: r.status as CheckStatus,
+          value: r.value,
+          required: r.required,
+          message: r.message,
+          recommendation: r.recommendation,
+        }));
+
+        const passed = checkResults.filter(r => r.status === "pass");
+        const failed = checkResults.filter(r => r.status === "fail");
+        const warnings = checkResults.filter(r => r.status === "warning");
+
+        const byLevel = (level: WcagLevel) => ({
+          passed: checkResults.filter(r => r.level === level && r.status === "pass").length,
+          failed: checkResults.filter(r => r.level === level && r.status === "fail").length,
+        });
+
+        const report: ValidationReport = {
+          summary: {
+            total: checkResults.length,
+            passed: passed.length,
+            failed: failed.length,
+            warnings: warnings.length,
+            levelA: byLevel("A"),
+            levelAA: byLevel("AA"),
+            levelAAA: byLevel("AAA"),
+          },
+          results: checkResults,
+          human: "",
+          machine: machineData,
+        };
+
+        const markdown = formatMarkdownReport(report, { title, url, notes });
+
+        const date = machineData.timestamp
+          ? machineData.timestamp.split("T")[0]
+          : new Date().toISOString().split("T")[0];
+        const filename = `WCAG_Results_${date}.md`;
+        const dir = outputDir || process.cwd();
+        const filepath = resolve(dir, filename);
+
+        await writeFile(filepath, markdown, "utf-8");
+
+        return {
+          content: [
+            { type: "text", text: `Report saved to: ${filepath}` },
+            { type: "text", text: markdown },
+          ],
         };
       }
 

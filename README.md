@@ -139,12 +139,33 @@ Page structure and navigation validation.
 
 ### @wcag-mcp/full
 
-Umbrella server with overview tools.
+Umbrella server with overview and export tools.
 
 **Tools:**
 - `get_all_wcag_criteria` - All criteria filtered by level/category
 - `get_wcag_checklist` - Conformance level checklist
 - `wcag_help` - Usage help
+- `export_report` - Export any check's results to a Markdown file
+
+## Exporting Results
+
+Any WCAG check tool returns a `MACHINE-READABLE` JSON block in its output. Pass that JSON to `export_report` to save a formatted Markdown report:
+
+```
+WCAG_Results_2026-02-24.md
+```
+
+The report includes:
+- Summary table (total/passed/failed/warnings)
+- Breakdown by conformance level (A/AA/AAA)
+- Detailed failures with recommendations and WCAG reference links
+- Warnings and passed checks
+
+**Optional parameters:**
+- `outputDir` — directory to save the file (defaults to current working directory)
+- `title` — custom report title
+- `url` — URL of the page audited
+- `notes` — additional notes appended to the report
 
 ## Usage with Claude Code
 
@@ -193,6 +214,36 @@ Or use the umbrella server:
   }
 }
 ```
+
+### Auto-Approve Tools
+
+By default, Claude Code prompts for permission on every MCP tool call. To auto-approve all WCAG tools, add this to your Claude Code settings.
+
+**Per-project** (`.claude/settings.local.json`):
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "mcp__wcag*"
+    ]
+  }
+}
+```
+
+**Global** (`~/.claude/settings.json`):
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "mcp__wcag*"
+    ]
+  }
+}
+```
+
+The wildcard `mcp__wcag*` matches all tools from every WCAG MCP server (wcag-text, wcag-keyboard, wcag-aria, etc.).
 
 ## Development
 

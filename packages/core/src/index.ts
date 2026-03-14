@@ -24,6 +24,7 @@ export type { WcagCategory } from "./criteria.js";
 export {
   formatHumanReport,
   formatMachineReport,
+  formatMarkdownReport,
   createReport,
   formatToolResponse,
   formatErrorResponse,
