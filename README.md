@@ -9,13 +9,13 @@ This monorepo contains individual focused servers plus an umbrella server for fu
 ```
 packages/
 ├── core/       # Shared types, criteria definitions, report formatting
-├── text/       # Text accessibility (contrast, spacing, language) ✅
-├── keyboard/   # Keyboard navigation and focus (2.1.x, 2.4.x) ✅
-├── aria/       # ARIA roles, states, properties (4.1.x) ✅
-├── media/      # Captions, audio descriptions (1.2.x) ✅
-├── forms/      # Labels, error handling (1.3.x, 3.3.x) ✅
-├── structure/  # Headings, landmarks, reading order (1.3.x, 2.4.x) ✅
-└── full/       # Umbrella combining all servers ✅
+├── text/       # Text accessibility (contrast, spacing, language)
+├── keyboard/   # Keyboard navigation and focus (2.1.x, 2.4.x)
+├── aria/       # ARIA roles, states, properties (4.1.x)
+├── media/      # Captions, audio descriptions (1.2.x)
+├── forms/      # Labels, error handling (1.3.x, 3.3.x)
+├── structure/  # Headings, landmarks, reading order (1.3.x, 2.4.x)
+└── full/       # Umbrella combining all servers
 ```
 
 ## Quick Start
